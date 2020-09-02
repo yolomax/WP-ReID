@@ -1,0 +1,8 @@
+*.idea
+*.vscode
+*.empty
+*.pkl
+*.pyc
+*.pth
+*.lock
+*.json
