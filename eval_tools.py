@@ -1,14 +1,7 @@
 import numpy as np
 
 
-def norm_data(a):
-    a = a.copy()
-    a_min = np.min(a, axis=1, keepdims=True)
-    _range = np.max(a,axis=1,keepdims=True) - a_min
-    return (a - a_min) / _range
-
-
-def get_match_cmc(gt_dist, gt_dist_is_inf, gallery_id, traj_id, vision_GPS_T = 14, max_rank=5):
+def get_signal_match_cmc(gt_dist, gt_dist_is_inf, gallery_id, traj_id, max_rank=5):
     gallery_num = gallery_id.size
     traj_num = traj_id.size
 
@@ -24,8 +17,11 @@ def get_match_cmc(gt_dist, gt_dist_is_inf, gallery_id, traj_id, vision_GPS_T = 1
         # if matched_id.size == 1 and gt_dist_is_inf[g_i, matched_id]:  # true traj not exist
         #    continue
         if (gt_dist_is_inf[g_i] == True).all():
+            #Visual trajectories that do not have the same timestamp with the wireless signal are excluded.
             continue
         if matched_id.size == 0:
+            # Visual trajectories with no real wireless signals are eliminated.
+            # No wireless signals are recorded for the pedestrians to whom the videos belonged.
             continue
         new_gt_dist.append(gt_dist[g_i])
         new_gallery_id.append(gallery_id[g_i])

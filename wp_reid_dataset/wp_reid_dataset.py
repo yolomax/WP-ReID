@@ -9,7 +9,7 @@ class WPReID(object):
         self.cropped_images_dir = self.raw_data_folder / 'cropped_data'
         # Where you put the images data. You can contact us by email for this dataset.
 
-        self.split_file_dir = file_abs_path(__file__) / 'files' / 'wp_reid_info.json'
+        self.split_file_dir = file_abs_path(__file__).parent / 'files' / 'wp_reid_info.json'
 
         self.all_image_num = 106578
         self.resize_hw = (256, 128)

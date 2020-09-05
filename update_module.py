@@ -1,6 +1,13 @@
 import numpy as np
 
 
+def norm_data(a):
+    a = a.copy()
+    a_min = np.min(a, axis=1, keepdims=True)
+    _range = np.max(a,axis=1,keepdims=True) - a_min
+    return (a - a_min) / _range
+
+
 def trans_gps_diff_to_dist(a, b):
     dist = a - b
     j_dist = dist[0] * 111000 * np.cos(a[1] / 180 * np.pi)
@@ -42,7 +49,7 @@ def get_vision_record_dist(gallery_info, bndbox_gps, trajectory):
     return dist, np.asarray(traj_id, np.int64)
 
 
-def get_weighted_gt_dist(distMat, gt_gps_dist, k=5):
+def trajectory_distance_update(distMat, gt_gps_dist, k=5):
 
     assert gt_gps_dist.shape[0] == distMat.shape[0]
     gt_dist_sorted = np.sort(gt_gps_dist, axis=1)
@@ -92,11 +99,6 @@ def get_weighted_gt_dist(distMat, gt_gps_dist, k=5):
     return gt_gps_dist_raw
 
 
-def trajectory_distance_update(distMat, gt_gps_dist, k):
-    gt_gps_dist = get_weighted_gt_dist(distMat.copy(), gt_gps_dist.copy(), k=k)
-    return gt_gps_dist
-
-
 def visual_affinity_update(distMat, gt_dist, T, alpha=0.5):
     gps_distMat = np.zeros(distMat.shape, dtype=distMat.dtype)
     assert distMat.shape[0] == gt_dist.shape[0] and distMat.shape[1] == gt_dist.shape[0]
@@ -110,10 +112,10 @@ def visual_affinity_update(distMat, gt_dist, T, alpha=0.5):
 
     idx = gps_distMat <= T
     gps_distMat[idx] /= T
-    R = 1 - distMat
-    R = R.copy()
-    R[idx] = R[idx] * (1 - alpha) + (1 - gps_distMat[idx]) * alpha
+    S = 1 - distMat
+    S = S.copy()
+    S[idx] = S[idx] * (1 - alpha) + (1 - gps_distMat[idx]) * alpha
 
     for i in range(distMat.shape[0]):
-        R[i,i] = 1 - distMat[i, i]
-    return 1 - R
+        S[i,i] = 1 - distMat[i, i]
+    return 1 - S
