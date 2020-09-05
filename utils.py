@@ -2,6 +2,7 @@ import os
 import errno
 import pickle
 import json
+import numpy as np
 from pathlib import Path
 
 
@@ -31,6 +32,10 @@ def check_path(folder_dir, create=False):
         else:
             raise IOError
     return folder_dir
+
+
+def file_abs_path(arg):
+    return Path(os.path.realpath(arg)).parent
 
 
 class DataPacker(object):
