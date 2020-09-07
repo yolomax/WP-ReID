@@ -15,6 +15,9 @@ MM, Oral Paper，2020.
 
 Given a query video sequence, we not only seek to retrieve other videos with the same identity but also identify the corresponding wireless signal, i.e., the wireless positioning trajectory of the corresponding mobile phone taken by the same person.
 
+## WP-ReID Dataset
+![WP-ReID Dataset](./cover/dataset.png)
+
 ## Testing and evaluation
 ```shell
 python main.py
