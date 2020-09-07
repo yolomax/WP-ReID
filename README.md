@@ -13,7 +13,7 @@ MM, Oral Paper，2020.
 
 <div  align="center"><img src="./cover/task.png" width = "500" alt="图片名称" align=center/></div>
 
-WPReID contains not only visual data (video sequences of pedestrians) but also wireless signals (wireless positioning trajectories of the mobile phones carried by pedestrians).
+WP-ReID contains not only visual data (video sequences of pedestrians) but also wireless signals (wireless positioning trajectories of the mobile phones carried by pedestrians).
 
 Given a query video sequence, we not only seek to retrieve other videos with the same identity but also identify the corresponding wireless signal, i.e., the wireless positioning trajectory of the corresponding mobile phone taken by the same person.
 
