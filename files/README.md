@@ -4,7 +4,7 @@
 
 MM, Oral Paper，2020.
 
-[[arxiv](https://arxiv.org/abs/2008.04146v2)]
+[[PDF](https://dl.acm.org/doi/10.1145/3394171.3413984)]
 
 
 wp_reid_info.json is a configuration file for the WP-ReID dataset and contains how the test set is partitioned.
