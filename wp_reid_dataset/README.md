@@ -4,7 +4,7 @@
 
 MM, Oral Paper，2020.
 
-[[arxiv](https://arxiv.org/abs/2008.04146v2)]
+[[PDF](https://dl.acm.org/doi/10.1145/3394171.3413984)]
 
 ## WP-ReID Dataset
 ![WP-ReID Dataset](./../cover/dataset.png)
