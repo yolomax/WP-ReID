@@ -7,7 +7,7 @@ Implementation of "Vision Meets Wireless Positioning: Effective Person Re-identi
 
 MM, Oral Paper，2020.
 
-[[arxiv](https://arxiv.org/abs/2008.04146v2)]
+[[PDF](https://dl.acm.org/doi/10.1145/3394171.3413984)]
 
 ## The overview of the problem studied in this work
 
