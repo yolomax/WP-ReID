@@ -43,6 +43,8 @@ def compute_video_cmc_map(distMat, q_pids, g_pids, q_camids, g_camids, junk_idx=
     probe_num = q_pids.size
     gallery_num = g_pids.size
     max_rank = max_rank if gallery_num >= max_rank else gallery_num
+    assert distMat.shape[0] == probe_num and distMat.shape[1] == gallery_num
+    assert q_camids.size == probe_num and g_camids.size == gallery_num
 
     ap = np.zeros(probe_num, np.float32)
     cmc = np.zeros((probe_num, gallery_num), np.float32)

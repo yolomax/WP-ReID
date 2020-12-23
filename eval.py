@@ -19,6 +19,7 @@ class RecurrentContextPropagationModule(object):
 
     def init_dataset_info(self, all_info, query_index, gallery_index):
         self.query_index = query_index
+        self.gallery_index = gallery_index
         query_info = all_info[self.query_index]
         gallery_info = all_info[gallery_index]
         self.query_id = query_info[:, 0]
@@ -28,7 +29,7 @@ class RecurrentContextPropagationModule(object):
 
     def rcpm(self, gt_dist_new, iteration=1):
         distMat_new = visual_affinity_update(self.raw_distMat, gt_dist=gt_dist_new.copy(), T=self.delta, alpha=self.alpha)
-        cmc_reid, mAP_reid = compute_video_cmc_map(distMat_new[self.query_index], self.query_id, self.gallery_id,
+        cmc_reid, mAP_reid = compute_video_cmc_map(distMat_new[self.query_index][:, self.gallery_index], self.query_id, self.gallery_id,
                                             self.query_cam_id, self.gallery_cam_id)
         gt_dist_new = trajectory_distance_update(distMat_new, self.raw_gt_dist.copy(), k=self.k)
         cmc_SM = get_signal_match_cmc(gt_dist_new[self.query_index].copy(), self.gt_dist_is_inf[self.query_index].copy(),
@@ -41,7 +42,7 @@ class RecurrentContextPropagationModule(object):
 
     def __call__(self, *args, **kwargs):
         print('K={}, Delta={}, Iteration={}'.format(self.k, self.delta, self.iters))
-        cmc_reid, mAP_reid = compute_video_cmc_map(self.raw_distMat[self.query_index], self.query_id, self.gallery_id,
+        cmc_reid, mAP_reid = compute_video_cmc_map(self.raw_distMat[self.query_index][:, self.gallery_index], self.query_id, self.gallery_id,
                                          self.query_cam_id, self.gallery_cam_id)
         cmc_SM = get_signal_match_cmc(self.raw_gt_dist[self.query_index].copy(), self.gt_dist_is_inf[self.query_index].copy(),
                                self.query_id.copy(), self.traj_id.copy())
