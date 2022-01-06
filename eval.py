@@ -58,12 +58,12 @@ class RecurrentContextPropagationModule(object):
 def update_with_gps(distMat, all_info, query_index, gallery_index, bndbox_gps, trajectory, k=9, delta=74, iters=5):
     '''
     :param distMat: (g, g), the distance between gallery tracklet with gallery tracklet
-            :param all_info: (num, 5), num is the total number of gallery tracklet, each row [p_id, cam_id, idx, idx+frame_num, frame_num]
-            :param query_index: the query index for query tracklet in gallery tracklet
-            :param gallery_index: the gallery index for query tracklet in gallery tracklet
-            :param bndbox_gps: (image_num, 3), each raw: [time_id, gps_j, gps_w]
-            :param trajectory: dict, the key is the corresponding person id. trajectory[p_id] : (n, 3), each row [timestamp, gps_j, gps_w]
-            :return:
+    :param all_info: (num, 5), num is the total number of gallery tracklet, each row [p_id, cam_id, idx, idx+frame_num, frame_num]
+    :param query_index: the query index for query tracklet in gallery tracklet
+    :param gallery_index: the gallery index for query tracklet in gallery tracklet
+    :param bndbox_gps: (image_num, 3), each raw: [time_id, gps_j, gps_w]
+    :param trajectory: dict, the key is the corresponding person id. trajectory[p_id] : (n, 3), each row [timestamp, gps_j, gps_w]
+    :return:
     '''
     gallery_info = all_info[gallery_index]
     gt_gps_dist, traj_id = get_vision_record_dist(gallery_info.copy(), bndbox_gps.copy(), deepcopy(trajectory))

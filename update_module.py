@@ -52,7 +52,10 @@ def get_vision_record_dist(gallery_info, bndbox_gps, trajectory):
 def trajectory_distance_update(distMat, gt_gps_dist, k=5):
 
     assert gt_gps_dist.shape[0] == distMat.shape[0]
-    gt_dist_sorted = np.sort(gt_gps_dist, axis=1)
+    
+    gt_dist_sorted = np.sort(gt_gps_dist, axis=1)   
+    #sorted: to get the smallest distance between one video sequence and a wireless traj.
+    # if this value is inf, then this video sequence doesn't get a corresponding traj.
     idx_selected = []
     for g_i in range(gt_gps_dist.shape[0]):    # remove the video having no traj
         if np.isinf(gt_dist_sorted[g_i, 0]):
@@ -60,31 +63,32 @@ def trajectory_distance_update(distMat, gt_gps_dist, k=5):
         idx_selected.append(g_i)
     idx_selected = np.asarray(idx_selected)
 
-    distMat = distMat[idx_selected][:, idx_selected].copy()
-    gt_gps_dist_raw = gt_gps_dist.copy()
+    distMat = distMat[idx_selected][:, idx_selected].copy() # why not distMat[idx_selected][idx_selected]?
+    gt_gps_dist_raw = gt_gps_dist.copy()    # return value, we only need to refine part of this matrix.
     gt_gps_dist = gt_gps_dist[idx_selected].copy()
 
-    raw_gt_dist = gt_gps_dist.copy()
-    idx = np.argsort(distMat, axis=1)[:, :k]
+    #raw_gt_dist = gt_gps_dist.copy()
+    idx = np.argsort(distMat, axis=1)[:, :k]    # help np.argsort(x): return the index of sorted value (each row);
+    #the set corresponds to \phi K-nearest set
     distMat_sorted = np.sort(distMat, axis=1)[:, :k]
-    tg_dist = gt_gps_dist.T
+    tg_dist = gt_gps_dist.T # matrix transpose
     query_num = distMat.shape[0]
 
     gt_dist_wighted = []
-    for q_i in range(query_num):
-        tg_dist_i = tg_dist[:, idx[q_i]].copy()
-        dist_weight = 1 - distMat_sorted[q_i]
+    for q_i in range(query_num):    # q_i the column index, representing the distance between i^th video sequence and others.
+        tg_dist_i = tg_dist[:, idx[q_i]].copy()     
+        dist_weight = 1 - distMat_sorted[q_i]   # find weight(vector) for every q_i
 
         dist_weight = np.expand_dims(dist_weight, axis=0)
         dist_weight = np.repeat(dist_weight, tg_dist_i.shape[0], axis=0)
         dist_weight[tg_dist_i == np.inf] = 0
-        tg_dist_i[tg_dist_i == np.inf] = 0
+        #tg_dist_i[tg_dist_i == np.inf] = 0
         dist_weight_sum = dist_weight.sum(axis=1, keepdims=True)
 
         ident_idx = dist_weight_sum == 0
         ident_idx = ident_idx.reshape(-1)
 
-        dist_weight = dist_weight / (dist_weight_sum + 1e-12)
+        dist_weight = dist_weight / (dist_weight_sum + 1e-12)   # normalize the weight vector
 
         tg_dist_wighted_i = tg_dist_i * dist_weight
         tg_dist_wighted_i = tg_dist_wighted_i.sum(axis=1)
@@ -100,9 +104,15 @@ def trajectory_distance_update(distMat, gt_gps_dist, k=5):
 
 
 def visual_affinity_update(distMat, gt_dist, T, alpha=0.5):
+    #distMat corresponds to normalized F_{i, j} ?
+    #gt_dis are the matrix that record the distance between each video squence(trajectory) and each wireless trajectory.
+    #gt_dis size: (N x M) 
+    #gps_disMat are the matrix that record \hat D_{i, j}
+    #gps_disMat size: (N x N)
     gps_distMat = np.zeros(distMat.shape, dtype=distMat.dtype)
-    assert distMat.shape[0] == gt_dist.shape[0] and distMat.shape[1] == gt_dist.shape[0]
-
+    assert distMat.shape[0] == gt_dist.shape[0] and distMat.shape[1] == gt_dist.shape[0] # == N (the number of video sequences)
+    #calcalate \hat D_{i, j} i, j are lower index of two video sequences
+    #recall the definition of \hat D_{i, j}: ...
     for q in range(distMat.shape[0]):
         gt_dist_q = gt_dist[q]
         for g in range(distMat.shape[1]):
@@ -110,12 +120,13 @@ def visual_affinity_update(distMat, gt_dist, T, alpha=0.5):
             avg_dist = (gt_dist_q + gt_dist_g) / 2.0
             gps_distMat[q, g] = avg_dist.min()
 
-    idx = gps_distMat <= T
+    idx = gps_distMat <= T #threshold
     gps_distMat[idx] /= T
     S = 1 - distMat
     S = S.copy()
+    #update cases gps_dist <= threshold
     S[idx] = S[idx] * (1 - alpha) + (1 - gps_distMat[idx]) * alpha
-
+    #do not update cases i == j
     for i in range(distMat.shape[0]):
         S[i,i] = 1 - distMat[i, i]
     return 1 - S

@@ -43,4 +43,3 @@ if __name__ == '__main__':
     update_with_gps(distmat, wp_reid_dataset.test_info, wp_reid_dataset.probe_index, wp_reid_dataset.gallery_index,
                     wp_reid_dataset.gps_info, wp_reid_dataset.trajectory_info, k=4)
 
-
