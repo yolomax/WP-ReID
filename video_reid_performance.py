@@ -7,6 +7,10 @@ import numpy as np
 
 
 def compute_AP(good_index, junk_index, order):
+    """
+    input:
+    return:
+    """
     cmc = np.zeros(order.size, dtype=np.float32)
     nGood = good_index.size
     old_recall = 0.0
