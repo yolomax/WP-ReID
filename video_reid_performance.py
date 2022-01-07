@@ -8,18 +8,35 @@ import numpy as np
 
 def compute_AP(good_index, junk_index, order):
     """
-    input:
+    Compute Average Precision(AP) and CMC for one query.\\
+    AP is defined as the area under the Precision-Recall(PR) curve.
+
+    params:
+    good_index: 1-d array; indexs that record all good prediction;\\
+    junk_index: 1-d array; indexs that record all junk predictions:\\
+    order: 1-d array; ordered indexs; 
+
     return:
-    """
+    ap: a scalar;\\
+    cmc: 1-d array; size(cmc) = (order,);
+
+    example: 
+    a list with good/junk prediction. (1: good; 0: junk) \\
+    order = [1, 1, 0, 1, 1, 0, 0, 1, 0, 0, 0, 0]\\
+    good_index == [0, 1, 3, 4, 7,];\\
+    junk_index == [2, 5, 6, 8, 9, 10, 11,];\\
+    >> cmc == [] \\
+    >> ap == 
+        """
     cmc = np.zeros(order.size, dtype=np.float32)
-    nGood = good_index.size
-    old_recall = 0.0
-    old_precision = 1.0
-    ap = 0.0
+    nGood = good_index.size # total number of good prediction
+    old_recall = 0.0    # init recall, then recall increase util 1
+    old_precision = 1.0 # init precision, then precision decrease
+    ap = 0.0    # init ap
     intersect_size = 0.0
     j = 0
-    good_now = 0
-    nJunk = 0
+    good_now = 0    # the number of good image (good prediction)
+    nJunk = 0       # the number of junk image
     for i_order, order_i in enumerate(order):
         flag = False
         if good_index[good_index == order_i].size != 0:
@@ -38,7 +55,7 @@ def compute_AP(good_index, junk_index, order):
         old_recall = recall
         old_precision = precision
         j += 1
-        if good_now == nGood:
+        if good_now == nGood:   # all good image is recalled.
             break
     return ap, cmc
 
