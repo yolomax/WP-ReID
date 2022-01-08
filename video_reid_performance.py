@@ -11,23 +11,23 @@ def compute_AP(good_index, junk_index, order):
     Compute Average Precision(AP) and CMC for one query.\\
     AP is defined as the area under the Precision-Recall(PR) curve.
 
-    **params**:
+    params:
     good_index: 1-d array; indexs that record all good prediction;\\
     junk_index: 1-d array; indexs that record all junk predictions:\\
     order: 1-d array; ordered indexs; 
 
-    **return**:
+    return:
     ap: a scalar;\\
     cmc: 1-d array; size(cmc) = (order,);
 
-    **example**: \\
+    example: \\
     a list with good/junk prediction. (1: good; 0: junk) \\
     order = [1, 1, 0, 1, 1, 0, 0, 1, 0, 0, 0, 0]\\
     good_index == [0, 1, 3, 4, 7,];\\
     junk_index == [2, 5, 6, 8, 9, 10, 11,];\\
     >> cmc == [] \\
     >> ap == 
-        """
+    """
     cmc = np.zeros(order.size, dtype=np.float32)
     nGood = good_index.size # total number of good prediction
     old_recall = 0.0    # init recall, then recall increase util 1
@@ -69,17 +69,22 @@ def compute_video_cmc_map(distMat, q_pids, g_pids, q_camids, g_camids, junk_idx=
     g_pids: array_like, size: N; gallary person ID \\
     q_camids: array_like, size: M; query camera ID \\
     g_camids: array_like, size: N; gallary camera ID \\
-    junk_idx: \\
-    mark_rank: 
+    junk_idx: index of junk image. \\
+    max_rank: the maximum of rank numbers. \\
 
     return:
 
     cmc: array_like, size: N; Cumulative Match Characteristics \\
     map: scalar; mean Average Precision 
+
+    Q: What is good / junk image?
+    A: Good image is defined as the gallary images with the same ID with the probe, but different camera ID;
+    while junk image gets the same ID with the probe. 
+
     """
     probe_num = q_pids.size
     gallery_num = g_pids.size
-    max_rank = max_rank if gallery_num >= max_rank else gallery_num 
+    max_rank = max_rank if gallery_num >= max_rank else gallery_num  
     assert distMat.shape[0] == probe_num and distMat.shape[1] == gallery_num
     assert q_camids.size == probe_num and g_camids.size == gallery_num
 
@@ -87,12 +92,12 @@ def compute_video_cmc_map(distMat, q_pids, g_pids, q_camids, g_camids, junk_idx=
     cmc = np.zeros((probe_num, gallery_num), np.float32)    # multiple query CMC; size: M x N
     for i_p in range(probe_num):    # the i_p ^th probe image
         dist = distMat[i_p, ...]
-        p_id = q_pids[i_p]  # probe person id
-        cam_p = q_camids[i_p]   # 
-        pos = np.where(g_pids == p_id)[0]   # np.where(condition) returns condition satisfies.
-        pos2 = np.where(g_camids[pos] != cam_p)
+        p_id = q_pids[i_p]  # one person id
+        cam_p = q_camids[i_p]   # one camera id 
+        pos = np.where(g_pids == p_id)[0]   # find the index where Person ID is the same as probe
+        pos2 = np.where(g_camids[pos] != cam_p) # find good image
         good_index = pos[pos2]
-        pos3 = np.where(g_camids[pos] == cam_p)
+        pos3 = np.where(g_camids[pos] == cam_p) # find junk image
         temp_junk_index = pos[pos3]
         junk_index = temp_junk_index if junk_idx is None else np.concatenate(
             (junk_idx, temp_junk_index), axis=0)
