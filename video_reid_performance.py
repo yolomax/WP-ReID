@@ -2,7 +2,6 @@
 The evaluation code is the python implementation of the evaluation code from https://github.com/liangzheng06/MARS-evaluation
 '''
 
-
 import numpy as np
 
 
@@ -12,21 +11,13 @@ def compute_AP(good_index, junk_index, order):
     AP is defined as the area under the Precision-Recall(PR) curve.
 
     params:
-    good_index: 1-d array; indexs that record all good prediction;\\
-    junk_index: 1-d array; indexs that record all junk predictions:\\
-    order: 1-d array; ordered indexs; 
+    good_index: 1-d array; indexs that record all good images;\\
+    junk_index: 1-d array; indexs that record all junk images:\\
+    order: 1-d array; index record the distance from small to large; 
 
     return:
     ap: a scalar;\\
-    cmc: 1-d array; size(cmc) = (order,);
-
-    example: \\
-    a list with good/junk prediction. (1: good; 0: junk) \\
-    order = [1, 1, 0, 1, 1, 0, 0, 1, 0, 0, 0, 0]\\
-    good_index == [0, 1, 3, 4, 7,];\\
-    junk_index == [2, 5, 6, 8, 9, 10, 11,];\\
-    >> cmc == [] \\
-    >> ap == 
+    cmc: 1-d array;
     """
     cmc = np.zeros(order.size, dtype=np.float32)
     nGood = good_index.size # total number of good prediction
@@ -40,7 +31,7 @@ def compute_AP(good_index, junk_index, order):
     for i_order , order_i in enumerate(order):
         flag = False    # good/junk index, default "junk"
         if good_index[good_index == order_i].size != 0:
-            cmc[i_order - nJunk:] = 1
+            cmc[i_order - nJunk:] = 1   # after a good index, cmc == 1
             flag = True
             good_now += 1
         if junk_index[junk_index == order_i].size != 0:
@@ -49,11 +40,11 @@ def compute_AP(good_index, junk_index, order):
 
         if flag:
             intersect_size += 1.0
-        recall = intersect_size / nGood
-        precision = intersect_size / (j + 1)
-        ap = ap + (recall - old_recall) * ((old_precision + precision) / 2)
-        old_recall = recall
-        old_precision = precision
+        recall = intersect_size / nGood # TP / TP + TN
+        precision = intersect_size / (j + 1) # TP / TP + FP
+        ap += (recall - old_recall) * ((old_precision + precision) / 2) # area under PR curve
+        old_recall = recall # update
+        old_precision = precision # update
         j += 1
         if good_now == nGood:   # all good image is recalled.
             break
@@ -94,14 +85,14 @@ def compute_video_cmc_map(distMat, q_pids, g_pids, q_camids, g_camids, junk_idx=
         dist = distMat[i_p, ...]
         p_id = q_pids[i_p]  # one person id
         cam_p = q_camids[i_p]   # one camera id 
-        pos = np.where(g_pids == p_id)[0]   # find the index where Person ID is the same as probe
+        pos = np.where(g_pids == p_id)[0]   # find the index where Person ID is the same as probe. (U should know how np.where works)
         pos2 = np.where(g_camids[pos] != cam_p) # find good image
-        good_index = pos[pos2]
+        good_index = pos[pos2]  # tuple as index
         pos3 = np.where(g_camids[pos] == cam_p) # find junk image
         temp_junk_index = pos[pos3]
         junk_index = temp_junk_index if junk_idx is None else np.concatenate(
             (junk_idx, temp_junk_index), axis=0)
-        dist_order = np.argsort(dist)
+        dist_order = np.argsort(dist) # return index 
         ap[i_p, ...], cmc[i_p, ...] = compute_AP(good_index, junk_index, dist_order) # recall "compute_AP" function
 
     cmc = np.sum(cmc, axis=0) / probe_num
